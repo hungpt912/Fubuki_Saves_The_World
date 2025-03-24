@@ -6,7 +6,8 @@
 
 #define GRAVITY_SPEED 0.8
 #define MAX_FALL_SPEED 10
-#define PLAYER_SPEED 1
+#define PLAYER_SPEED 10
+#define PLAYER_JUMP 16
 
 class MainObject : public BaseObject{
 public:
@@ -28,6 +29,7 @@ public:
         map_x_ = map_x;
         map_y_ = map_y;
     };
+    void CenterEntityOnMap(Map &data);
 
 private:
     float x_val_;
@@ -47,6 +49,8 @@ private:
 
     int map_x_;
     int map_y_;
+
+    int come_back_time_;
 };
 
 #endif // MAIN_OBJECT_H

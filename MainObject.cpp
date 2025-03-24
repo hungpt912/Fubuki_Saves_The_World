@@ -17,6 +17,7 @@ MainObject::MainObject(){
     on_ground_ = false;
     map_x_ = 0;
     map_y_ = 0;
+    come_back_time_ = 0;
 }
 
 MainObject::~MainObject(){
@@ -79,10 +80,12 @@ void MainObject::set_clip(){
 }
 
 void MainObject::Show(SDL_Renderer* des){
-    if (status_ == WALK_LEFT){
-        LoadImg("img/player_left.png", des);
-    } else{
-        LoadImg("img/player_right.png", des);
+    if (on_ground_ == true){
+        if (status_ == WALK_LEFT){
+            LoadImg("img/player_left.png", des);
+        } else{
+            LoadImg("img/player_right.png", des);
+        }
     }
 
     if (input_type_.left_ == 1 || input_type_.right_ == 1){
@@ -95,13 +98,15 @@ void MainObject::Show(SDL_Renderer* des){
         frame_ = 0;
     }
 
-    rect_.x = x_pos_;
-    rect_.y = y_pos_;
+    if (come_back_time_ == 0){
+        rect_.x = x_pos_ - map_x_;
+        rect_.y = y_pos_ - map_y_;
 
-    SDL_Rect* current_clip = &frame_clip_[frame_];
-    SDL_Rect renderQuad = {rect_.x, rect_.y, width_frame_, height_frame_};
+        SDL_Rect* current_clip = &frame_clip_[frame_];
+        SDL_Rect renderQuad = {rect_.x, rect_.y, width_frame_, height_frame_};
 
-    SDL_RenderCopy(des, p_object_, current_clip, &renderQuad);
+        SDL_RenderCopy(des, p_object_, current_clip, &renderQuad);
+    }
 }
 
 void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
@@ -111,7 +116,13 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
             {
                 status_ = WALK_RIGHT;
                 input_type_.right_ = 1;
-                input_type_.left_ = 0;   //in case type both left and right
+                input_type_.left_ = 0;
+                  //in case type both left and right
+                if (on_ground_ == true){
+                    LoadImg("img/player_right.png", screen);
+                } else{
+                    LoadImg("img/jump_right.png", screen);
+                }
             }
             break;
         case SDLK_LEFT:
@@ -119,6 +130,11 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
                 status_ = WALK_LEFT;
                 input_type_.left_ = 1;
                 input_type_.right_ = 0;
+                if (on_ground_ == true){
+                    LoadImg("img/player_left.png", screen);
+                } else{
+                    LoadImg("img/jump_left.png", screen);
+                }
             }
             break;
         default:
@@ -140,26 +156,74 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
             break;
         }
     }
+
+    if (events.type == SDL_MOUSEBUTTONDOWN){
+        if (events.button.button == SDL_BUTTON_RIGHT){
+            input_type_.jump_ = 1;
+        }
+    }
 }
 
-void MainObject::DoPlayer(Map& data){
-    x_val_ = 0;
-    y_val_ += GRAVITY_SPEED;
+void MainObject::DoPlayer(Map& data){  //move player
+    if (come_back_time_ == 0){
+        x_val_ = 0;
+        y_val_ += GRAVITY_SPEED;
 
-    if (y_val_ >= MAX_FALL_SPEED){
-        y_val_ = MAX_FALL_SPEED;
+        if (y_val_ >= MAX_FALL_SPEED){
+            y_val_ = MAX_FALL_SPEED;
+        }
+
+        if (input_type_.left_ == 1){
+            x_val_ -= PLAYER_SPEED;
+        } else if (input_type_.right_ == 1){
+            x_val_ += PLAYER_SPEED;
+        }
+
+        if (input_type_.jump_ == 1){
+            if (on_ground_ == true){
+                y_val_ = - PLAYER_JUMP;
+            }
+            on_ground_ = false;
+            input_type_.jump_ = 0;
+        }
+
+        CheckToMap(data);
+        CenterEntityOnMap(data);
     }
 
-    if (input_type_.left_ == 1){
-        x_val_ -= PLAYER_SPEED;
-    } else if (input_type_.right_ == 1){
-        x_val_ += PLAYER_SPEED;
+    if (come_back_time_ > 0){
+        come_back_time_ --;
+        if (come_back_time_ == 0){
+            if (x_pos_ > 256){
+                x_pos_ -= 256; //4 tile
+                map_x_ -= 256;
+            } else {
+                x_pos_ = 0;
+            }
+            y_pos_ = 0;
+            x_val_ = 0;
+            y_val_ = 0;
+        }
     }
-
-    CheckToMap(data);
 }
 
-void MainObject::CheckToMap(Map &data){
+void MainObject::CenterEntityOnMap(Map &data){   //di chuyen map theo nhan vat
+    data.start_x_ = x_pos_ - (SCREEN_WIDTH / 2);
+    if (data.start_x_ < 0){
+        data.start_x_ = 0;
+    } else if (data.start_x_ + SCREEN_WIDTH >= data.max_x_){
+        data.start_x_ = data.max_x_ - SCREEN_WIDTH;
+    }
+
+    data.start_y_ = y_pos_ - (SCREEN_HEIGHT / 2);
+    if (data.start_y_ < 0){
+        data.start_y_ = 0;
+    } else if (data.start_y_ + SCREEN_HEIGHT >= data.max_y_){
+        data.start_y_ = data.max_y_ - SCREEN_HEIGHT;
+    }
+}
+
+void MainObject::CheckToMap(Map &data){  //dung tren map
     int x1 = 0;
     int x2 = 0;
 
@@ -204,6 +268,7 @@ void MainObject::CheckToMap(Map &data){
                 y_pos_ = y2 * TILE_SIZE;
                 y_pos_ -= (height_frame_ + 1);
                 y_val_ = 0;
+                on_ground_ = true;
             }
         } else if (y_val_ < 0){
             if (data.tile[y1][x1] != BLANK || data.tile[y1][x2] != BLANK){
@@ -223,4 +288,7 @@ void MainObject::CheckToMap(Map &data){
 
     }
 
+    if (y_pos_ > data.max_y_){
+        come_back_time_ = 60;
+    }
 }
