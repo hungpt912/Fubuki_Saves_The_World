@@ -3,6 +3,8 @@
 
 #include "CommonFunc.h"
 #include "BaseObject.h"
+#include "BulletObject.h"
+#include <vector>
 
 #define GRAVITY_SPEED 0.8
 #define MAX_FALL_SPEED 10
@@ -15,8 +17,9 @@ public:
     ~MainObject();
 
     enum WalkType{
-        WALK_RIGHT = 0,
-        WALK_LEFT = 1,
+        WALK_NONE = 0,
+        WALK_RIGHT = 1,
+        WALK_LEFT = 2,
     };
     bool LoadImg(std::string path, SDL_Renderer* screen);
     void Show(SDL_Renderer* des);
@@ -30,8 +33,17 @@ public:
         map_y_ = map_y;
     };
     void CenterEntityOnMap(Map &data);
+    void UpdateImagePlayer(SDL_Renderer* des);
 
+    void set_buller_list(std::vector<BulletObject*> bullet_list){
+        p_bullet_list_ = bullet_list;
+    }
+    std::vector<BulletObject*> get_bullet_list() const{
+        return p_bullet_list_;
+    }
+    void HandleBullet(SDL_Renderer* des);
 private:
+    std::vector<BulletObject*> p_bullet_list_;
     float x_val_;
     float y_val_;
 

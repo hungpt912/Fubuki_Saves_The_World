@@ -3,7 +3,7 @@
 #include "BaseObject.h"
 #include "map.h"
 #include "MainObject.h"
-#include "timer.h"
+#include "timer.h   "
 using namespace std;
 
 BaseObject g_background;
@@ -93,6 +93,7 @@ int main(int argc, char* argv[]){
 
         Map map_data = game_map.getMap();
 
+        p_player.HandleBullet(g_screen);
         p_player.SetMapXY(map_data.start_x_, map_data.start_y_);
         p_player.DoPlayer(map_data);
         p_player.Show(g_screen);
