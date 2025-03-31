@@ -6,6 +6,7 @@
 #include <string>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <vector>
 
 static SDL_Window* g_window = NULL;
 static SDL_Renderer* g_screen = NULL;
@@ -29,6 +30,8 @@ const int RENDER_DRAW_COLOR = 0Xff;
 #define MAX_MAP_X 400
 #define MAX_MAP_Y 10
 
+#define STATE_MONEY 4
+
 typedef struct Input{
     int left_;
     int right_;
@@ -37,11 +40,15 @@ typedef struct Input{
     int jump_;
 };
 
-struct Map{
+typedef struct Map{
     int start_x_, start_y_;
     int max_x_, max_y_;
     int tile[MAX_MAP_Y][MAX_MAP_X];
     char* file_name_;
 };
+
+namespace SDLCommonFunc{
+    bool CheckCollision(const SDL_Rect& object1, const SDL_Rect& object2);
+}
 
 #endif

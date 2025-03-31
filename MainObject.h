@@ -4,12 +4,11 @@
 #include "CommonFunc.h"
 #include "BaseObject.h"
 #include "BulletObject.h"
-#include <vector>
 
 #define GRAVITY_SPEED 0.8
-#define MAX_FALL_SPEED 10
+#define MAX_FALL_SPEED 12
 #define PLAYER_SPEED 10
-#define PLAYER_JUMP 16
+#define PLAYER_JUMP 18
 
 class MainObject : public BaseObject{
 public:
@@ -42,7 +41,11 @@ public:
         return p_bullet_list_;
     }
     void HandleBullet(SDL_Renderer* des);
+    void RemoveBullet(const int& index);
+    void IncreaseMoney();
 private:
+
+    int money_count;
     std::vector<BulletObject*> p_bullet_list_;
     float x_val_;
     float y_val_;
@@ -63,6 +66,8 @@ private:
     int map_y_;
 
     int come_back_time_;
+
+    unsigned int current_bullet_type_;
 };
 
 #endif // MAIN_OBJECT_H

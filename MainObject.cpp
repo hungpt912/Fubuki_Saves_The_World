@@ -1,3 +1,4 @@
+
 #include "MainObject.h"
 
 MainObject::MainObject(){
@@ -18,6 +19,8 @@ MainObject::MainObject(){
     map_x_ = 0;
     map_y_ = 0;
     come_back_time_ = 0;
+    money_count = 0;
+    current_bullet_type_ = BulletObject::SPHERE_BULLET;
 }
 
 MainObject::~MainObject(){
@@ -123,6 +126,14 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
                 UpdateImagePlayer(screen);
             }
             break;
+        case SDLK_t:
+            {
+                current_bullet_type_ ++;
+                if (current_bullet_type_ > BulletObject::LASER_BULLET){
+                    current_bullet_type_ = BulletObject::SPHERE_BULLET;
+                }
+            }
+            break;
         default:
             break;
         }
@@ -148,14 +159,15 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
             input_type_.jump_ = 1;
         } else if (events.button.button == SDL_BUTTON_LEFT){
             BulletObject* p_bullet = new BulletObject();
-            p_bullet->LoadImg("img/bullet.png", screen);
+            p_bullet->set_bullet_type(current_bullet_type_);
+            p_bullet->LoadBullet(screen);
 
             if (status_ == WALK_LEFT){
                 p_bullet->set_bullet_dir(BulletObject::DIR_LEFT);
-                p_bullet->SetRect(this->rect_.x, rect_.y + height_frame_ * 0.1);
+                p_bullet->SetRect(this->rect_.x, rect_.y + height_frame_ * 0.6);
             }else {
                 p_bullet->set_bullet_dir(BulletObject::DIR_RIGHT);
-                p_bullet->SetRect(this->rect_.x + width_frame_ - 20, rect_.y + height_frame_ * 0.1);
+                p_bullet->SetRect(this->rect_.x + width_frame_ - 20, rect_.y + height_frame_ * 0.6);
             }
 
             p_bullet->set_x_val(20);
@@ -261,16 +273,35 @@ void MainObject::CheckToMap(Map &data){  //dung tren map
     y2 = (y_pos_ + height_min - 1) / TILE_SIZE;
 
     if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y){
-        if (x_val_ > 0){
-            if (data.tile[y1][x2] != BLANK || data.tile[y2][x2] != BLANK){
-                x_pos_ = x2 * TILE_SIZE;
-                x_pos_ -= width_frame_ + 1;
-                x_val_ = 0;
+        if (x_val_ > 0){  //moving to right
+
+            int val1 = data.tile[y1][x2];
+            int val2 = data.tile[y2][x2];
+
+            if (val1 == STATE_MONEY || val2 == STATE_MONEY){
+                data.tile[y1][x2] = 0;
+                data.tile[y2][x2] = 0;
+                IncreaseMoney();
+            } else{
+                if (val1 != BLANK || val2 != BLANK){
+                    x_pos_ = x2 * TILE_SIZE;
+                    x_pos_ -= width_frame_ + 1;
+                    x_val_ = 0;
+                }
             }
         } else if (x_val_ < 0){
-            if (data.tile[y1][x1] != BLANK || data.tile[y2][x1] != BLANK){
-                x_pos_ = (x1+1)*TILE_SIZE;
-                x_val_ = 0;
+            int val1 = data.tile[y1][x1];
+            int val2 = data.tile[y2][x1];
+
+            if (val1 == STATE_MONEY || val2 == STATE_MONEY){
+                data.tile[y1][x2] = 0;
+                data.tile[y2][x2] = 0;
+                IncreaseMoney();
+            } else{
+                if (val1 != BLANK || val2 != BLANK){
+                    x_pos_ = (x1+1)*TILE_SIZE;
+                    x_val_ = 0;
+                }
             }
         }
     }
@@ -285,20 +316,42 @@ void MainObject::CheckToMap(Map &data){  //dung tren map
 
     if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y){
         if (y_val_ > 0){
-            if (data.tile[y2][x1] != BLANK || data.tile[y2][x2] != BLANK){
-                y_pos_ = y2 * TILE_SIZE;
-                y_pos_ -= (height_frame_ + 1);
-                y_val_ = 0;
-                if (status_ == WALK_NONE){
-                    status_ = WALK_RIGHT;
+
+            int val1 = data.tile[y2][x1];
+            int val2 = data.tile[y2][x2];
+
+            if (val1 == STATE_MONEY || val2 == STATE_MONEY){
+                data.tile[y2][x1] = 0;
+                data.tile[y2][x2] = 0;
+                IncreaseMoney();
+            } else {
+                if (data.tile[y2][x1] != BLANK || data.tile[y2][x2] != BLANK){
+                    y_pos_ = y2 * TILE_SIZE;
+                    y_pos_ -= (height_frame_ + 1);
+                    y_val_ = 0;
+                    if (status_ == WALK_NONE){
+                        status_ = WALK_RIGHT;
+                    }
+                    on_ground_ = true;
                 }
-                on_ground_ = true;
             }
+
         } else if (y_val_ < 0){
-            if (data.tile[y1][x1] != BLANK || data.tile[y1][x2] != BLANK){
-                y_pos_ = (y1 + 1)*TILE_SIZE;
-                y_val_ = 0;
+
+            int val1 = data.tile[y1][x1];
+            int val2 = data.tile[y1][x2];
+
+            if (val1 == STATE_MONEY || val2 == STATE_MONEY){
+                data.tile[y1][x1] = 0;
+                data.tile[y1][x2] = 0;
+                IncreaseMoney();
+            } else {
+                if (data.tile[y1][x1] != BLANK || data.tile[y1][x2] != BLANK){
+                    y_pos_ = (y1 + 1)*TILE_SIZE;
+                    y_val_ = 0;
+                }
             }
+
         }
     }
 
@@ -329,6 +382,23 @@ void MainObject::UpdateImagePlayer(SDL_Renderer* des){
             LoadImg("img/jump_left.png", des);
         } else{
             LoadImg("img/jump_right.png", des);
+        }
+    }
+}
+
+void MainObject::IncreaseMoney(){
+    money_count ++;
+}
+
+void MainObject::RemoveBullet(const int& index){
+    int size_ = p_bullet_list_.size();
+    if (size_ > 0 && index < size_){
+        BulletObject* p_bullet = p_bullet_list_.at(index);
+        p_bullet_list_.erase(p_bullet_list_.begin() + index);
+
+        if (p_bullet){
+            delete p_bullet;
+            p_bullet = NULL;
         }
     }
 }
