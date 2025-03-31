@@ -33,6 +33,7 @@ public:
     };
     void CenterEntityOnMap(Map &data);
     void UpdateImagePlayer(SDL_Renderer* des);
+    SDL_Rect GetRectFrame();
 
     void set_buller_list(std::vector<BulletObject*> bullet_list){
         p_bullet_list_ = bullet_list;
@@ -43,6 +44,15 @@ public:
     void HandleBullet(SDL_Renderer* des);
     void RemoveBullet(const int& index);
     void IncreaseMoney();
+    int get_frame_width() const{
+        return width_frame_;
+    }
+    int get_frame_height() const{
+        return height_frame_;
+    }
+    void set_comeback_time(const int& cb_time){
+        come_back_time_ = cb_time;
+    }
 private:
 
     int money_count;

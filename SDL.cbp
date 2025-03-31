@@ -36,9 +36,14 @@
 		<Unit filename="BaseObject.h" />
 		<Unit filename="BulletObject.cpp" />
 		<Unit filename="BulletObject.h" />
+		<Unit filename="CommonFunc.cpp" />
 		<Unit filename="CommonFunc.h" />
+		<Unit filename="Explosion.cpp" />
+		<Unit filename="Explosion.h" />
 		<Unit filename="MainObject.cpp" />
 		<Unit filename="MainObject.h" />
+		<Unit filename="TextObject.cpp" />
+		<Unit filename="TextObject.h" />
 		<Unit filename="ThreatObject.cpp" />
 		<Unit filename="ThreatObject.h" />
 		<Unit filename="main.cpp" />

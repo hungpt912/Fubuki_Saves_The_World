@@ -10,6 +10,8 @@ ThreatsObject::ThreatsObject(){
     on_ground_ = 0;
     come_back_time_ = 0;
     frame_ = 0;
+    map_x_ = 0;
+    map_y_ = 0;
 
     animation_a_ = 0;
     animation_b_ = 0;
@@ -241,11 +243,11 @@ void ThreatsObject::InitThreats(){
 void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen){
     if (p_bullet != NULL){
 
-        p_bullet->set_bullet_type(BulletObject::LASER_BULLET);
+        p_bullet->set_bullet_type(BulletObject::SPHERE_BULLET);
         bool ret = p_bullet->LoadBullet(screen);
         if (ret){
+            p_bullet->set_is_move(false);
             p_bullet->LoadBullet(screen);
-            p_bullet->set_is_move(true);
             p_bullet->set_bullet_dir(BulletObject::DIR_LEFT);
             p_bullet->SetRect(rect_.x - 35, rect_.y + 10);
             p_bullet->set_x_val(15);
@@ -255,6 +257,7 @@ void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen){
 }
 
 void ThreatsObject::MakeBullet(SDL_Renderer* screen, const int& x_limit, const int& y_limit){
+
     for (int i = 0; i < bullet_list_.size(); i++){
         BulletObject* p_bullet = bullet_list_.at(i);
         if (p_bullet != NULL){
@@ -274,3 +277,26 @@ void ThreatsObject::MakeBullet(SDL_Renderer* screen, const int& x_limit, const i
         }
     }
 }
+
+void ThreatsObject::RemoveBullet(const int& index){
+    int size_ = bullet_list_.size();
+    if (size_ > 0 && index < size_){
+        BulletObject* p_bullet = bullet_list_.at(index);
+        bullet_list_.erase(bullet_list_.begin() + index);
+
+        if (p_bullet){
+            delete p_bullet;
+            p_bullet = NULL;
+        }
+    }
+}
+
+SDL_Rect ThreatsObject::GetRectFrame(){
+    SDL_Rect rect;
+    rect.x = rect_.x;
+    rect.y = rect_.y;
+    rect.w = width_frame_;
+    rect.h = height_frame_;
+    return rect;
+}
+

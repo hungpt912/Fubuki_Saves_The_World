@@ -24,8 +24,18 @@ MainObject::MainObject(){
 }
 
 MainObject::~MainObject(){
-
+    Free();
 }
+
+SDL_Rect MainObject::GetRectFrame(){
+    SDL_Rect rect;
+    rect.x = rect_.x;
+    rect.y = rect_.y;
+    rect.w = rect_.w / 8;
+    rect.h = rect_.h;
+    return rect;
+}
+
 
 bool MainObject::LoadImg(std::string path, SDL_Renderer* screen){
     bool ret = BaseObject :: LoadImg(path, screen);
@@ -107,7 +117,7 @@ void MainObject::Show(SDL_Renderer* des){
 }
 
 void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
-    if (events.type == SDL_KEYDOWN){
+    if (events.type == SDL_KEYDOWN){   // pressed key
         switch (events.key.keysym.sym){
         case SDLK_RIGHT:
             {
@@ -137,7 +147,7 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
         default:
             break;
         }
-    } else if (events.type == SDL_KEYUP){
+    } else if (events.type == SDL_KEYUP){  //unpress
         switch (events.key.keysym.sym){
         case SDLK_RIGHT:
             {
@@ -402,3 +412,4 @@ void MainObject::RemoveBullet(const int& index){
         }
     }
 }
+

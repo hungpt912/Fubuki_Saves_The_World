@@ -48,6 +48,7 @@ public:
         map_y_ = map_y;
     }
 
+    SDL_Rect GetRectFrame();
     void set_clips();
     bool LoadImg(std::string path, SDL_Renderer* screen);
     void Show(SDL_Renderer* des);
@@ -78,6 +79,8 @@ public:
     }
     void InitBullet(BulletObject *p_bullet, SDL_Renderer* screen);
     void MakeBullet(SDL_Renderer* screen, const int& x_limit, const int& y_limit);
+    void RemoveBullet(const int& index);
+
 private:
     int map_x_;
     int map_y_;
@@ -96,6 +99,7 @@ private:
     int animation_a_;
     int animation_b_;
     Input input_type_;
+    int bullet_delay_ = 60;
 
     std::vector<BulletObject*> bullet_list_;
 };
