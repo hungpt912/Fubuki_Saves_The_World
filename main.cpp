@@ -7,6 +7,8 @@
 #include "ThreatObject.h"
 #include "Explosion.h"
 #include "TextObject.h"
+#include "PlayerPower.h"
+#include "Geometric.h"
 using namespace std;
 
 BaseObject g_background;
@@ -135,7 +137,13 @@ int main(int argc, char* argv[]){
     MainObject p_player;
     p_player.LoadImg("img/player_right.png", g_screen);
     p_player.set_clip();
-    p_player.SetRect(100, 100);
+
+    PlayerPower player_power;
+    player_power.Init(g_screen);
+
+    PlayerMoney player_money;
+    player_money.Init(g_screen);
+    player_money.SetPos(SCREEN_WIDTH / 2 - 290, 8);
 
     std::vector<ThreatsObject*> threats_list = MakeThreatList();
 
@@ -154,6 +162,13 @@ int main(int argc, char* argv[]){
     //Time text
     TextObject time_game;
     time_game.SetColor(TextObject::WHITE_TEXT);
+
+    TextObject mark_game;
+    mark_game.SetColor(TextObject::WHITE_TEXT);
+    UINT64 mark_value = 0;
+
+    TextObject money_game;
+    money_game.SetColor(TextObject::WHITE_TEXT);
 
 
     bool is_quit = false;
@@ -182,6 +197,20 @@ int main(int argc, char* argv[]){
 
         game_map.setMap(map_data);
         game_map.DrawMap(g_screen);
+
+        //Draw Geometric
+        GeometricFormat rectangle_size(0, 0, SCREEN_WIDTH, 40);
+        ColorData color_data(21, 96, 189);
+        Geometric::RenderRectangle(rectangle_size, color_data, g_screen);
+
+        GeometricFormat outlineSize(1, 1, SCREEN_WIDTH - 1, 38);
+        ColorData color_data2(255, 255, 255);
+        Geometric::RenderOutline(outlineSize, color_data2, g_screen);
+
+        player_power.Show(g_screen);
+        player_money.Show(g_screen);
+
+
         for (int i = 0; i < threats_list.size(); i++){
             ThreatsObject* p_threat = threats_list.at(i);
             if (p_threat != NULL){
@@ -233,6 +262,8 @@ int main(int argc, char* argv[]){
                         p_player.SetRect(0, 0);
                         p_player.set_comeback_time(60);
                         SDL_Delay(1000);
+                        player_power.Decrease();
+                        player_power.Render(g_screen);
                         continue;
                     } else{
                         if (MessageBoxW(NULL, L"GAME OVER", L"Info", MB_OK | MB_ICONSTOP) == IDOK){
@@ -270,6 +301,7 @@ int main(int argc, char* argv[]){
                         bool bCol = SDLCommonFunc::CheckCollision(bRect, tRect);
 
                         if (bCol){
+                            mark_value ++;
                             for (int ex = 0; ex < NUM_FRAME_EXP; ++ex){
                                 int x_pos = p_bullet->GetRect().x - frame_exp_width*0.5;
                                 int y_pos = p_bullet->GetRect().y - frame_exp_height*0.5;
@@ -304,6 +336,20 @@ int main(int argc, char* argv[]){
             time_game.LoadFromRenderText(font_time, g_screen);
             time_game.RenderText(g_screen, SCREEN_WIDTH - 200, 15);
         }
+
+        std::string val_str_mark = std::to_string(mark_value);
+        std::string strMark("Mark: ");
+        strMark += val_str_mark;
+
+        mark_game.SetText(strMark);
+        mark_game.LoadFromRenderText(font_time, g_screen);
+        mark_game.RenderText(g_screen, SCREEN_WIDTH * 0.5 - 50, 15);
+
+        int money_value = p_player.get_money();
+        std::string money_str = std::to_string(money_value);
+        money_game.SetText(money_str);
+        money_game.LoadFromRenderText(font_time, g_screen);
+        money_game.RenderText(g_screen, SCREEN_WIDTH * 0.5 - 250, 15);
 
         SDL_RenderPresent(g_screen);
 

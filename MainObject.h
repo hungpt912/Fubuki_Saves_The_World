@@ -53,6 +53,9 @@ public:
     void set_comeback_time(const int& cb_time){
         come_back_time_ = cb_time;
     }
+    int get_money() const{
+        return money_count;
+    }
 private:
 
     int money_count;
