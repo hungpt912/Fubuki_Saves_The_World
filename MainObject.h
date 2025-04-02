@@ -31,6 +31,7 @@ public:
         map_x_ = map_x;
         map_y_ = map_y;
     };
+    void Reset();
     void CenterEntityOnMap(Map &data);
     void UpdateImagePlayer(SDL_Renderer* des);
     SDL_Rect GetRectFrame();
@@ -81,6 +82,7 @@ private:
     int come_back_time_;
 
     unsigned int current_bullet_type_;
+    unsigned int max_bullet_type_;
 };
 
 #endif // MAIN_OBJECT_H

@@ -16,7 +16,9 @@ public:
 
     enum BulletType{
         SPHERE_BULLET = 50,
-        LASER_BULLET = 51,
+        RED_BULLET = 51,
+        PINK_BULLET = 52,
+        GREEN_BULLET = 53,
     };
     void set_x_val(const int& xVal){
         x_val_ = xVal;

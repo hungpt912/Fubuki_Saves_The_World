@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include "CommonFunc.h"
 #include "BaseObject.h"
@@ -52,8 +53,8 @@ bool InitData(){
     return success;
 }
 
-bool LoadBackground(){
-    bool ret = g_background.LoadImg("img/background.png", g_screen);
+bool LoadBackground(std::string path){
+    bool ret = g_background.LoadImg(path, g_screen);
     if (ret == false){
         return false;
     }
@@ -117,6 +118,90 @@ std::vector<ThreatsObject*> MakeThreatList(){
     return list_threats;
 }
 
+bool ShowGameOverScreen(SDL_Renderer* screen, TTF_Font* font, UINT64 mark_value) {
+    // Tải hình ảnh nền "Game Over"
+    BaseObject game_over_background;
+    if (!game_over_background.LoadImg("img/game_over.png", screen)) {
+        std::cout << "Failed to load game_over.png: " << SDL_GetError() << std::endl;
+        return false; // Thoát nếu không tải được hình ảnh
+    }
+
+    // Tạo văn bản "Game Over"
+    TextObject game_over_text;
+    game_over_text.SetText("Game Over");
+    game_over_text.SetColor(TextObject::RED_TEXT);
+    if (!game_over_text.LoadFromRenderText(font, screen)) {
+        std::cout << "Failed to render Game Over text: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
+    //  "Play Again"
+    TextObject play_again_text;
+    play_again_text.SetText("Play Again (Press R)");
+    play_again_text.SetColor(TextObject::RED_TEXT);
+    if (!play_again_text.LoadFromRenderText(font, screen)) {
+        std::cout << "Failed to render Play Again text: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
+    // "Exit"
+    TextObject exit_text;
+    exit_text.SetText("Exit (Press Q)");
+    exit_text.SetColor(TextObject::RED_TEXT);
+    if (!exit_text.LoadFromRenderText(font, screen)) {
+        std::cout << "Failed to render Exit text: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
+    bool quit_game_over = false;
+    bool play_again = false;
+
+    while (!quit_game_over) {
+        // Xử lý sự kiện
+        while (SDL_PollEvent(&g_event) != 0) {
+            if (g_event.type == SDL_QUIT) {
+                quit_game_over = true;
+                play_again = false;
+            } else if (g_event.type == SDL_KEYDOWN) {
+                switch (g_event.key.keysym.sym) {
+                    case SDLK_r: // r to restart
+                        quit_game_over = true;
+                        play_again = true;
+                        break;
+                    case SDLK_q: // q to esc
+                        quit_game_over = true;
+                        play_again = false;
+                        break;
+                }
+            }
+        }
+
+        // bg "Game Over"
+        SDL_SetRenderDrawColor(screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
+        SDL_RenderClear(screen);
+
+        // bg
+        game_over_background.Render(screen, NULL);
+
+        // text
+        play_again_text.RenderText(screen, SCREEN_WIDTH / 2 - play_again_text.GetWidth() / 2, SCREEN_HEIGHT / 2 + 50);
+        exit_text.RenderText(screen, SCREEN_WIDTH / 2 - exit_text.GetWidth() / 2, SCREEN_HEIGHT / 2 + 100);
+
+        SDL_RenderPresent(screen);
+
+        // fps
+        SDL_Delay(1000 / FRAME_PER_SECOND);
+    }
+
+    // clear
+    game_over_background.Free();
+    game_over_text.Free();
+    play_again_text.Free();
+    exit_text.Free();
+
+    return play_again; // Trả về true nếu người chơi chọn "Play Again", false nếu chọn "Exit"
+}
+
 int main(int argc, char* argv[]){
 
     Timer fps_timer;
@@ -126,7 +211,7 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
-    if (LoadBackground() == false){
+    if (LoadBackground("img/background.png") == false){
         return -1;
     }
 
@@ -210,6 +295,9 @@ int main(int argc, char* argv[]){
         player_power.Show(g_screen);
         player_money.Show(g_screen);
 
+        Uint32 time_val = SDL_GetTicks() / 1000;
+        Uint32 val_time = 300 - time_val;
+
 
         for (int i = 0; i < threats_list.size(); i++){
             ThreatsObject* p_threat = threats_list.at(i);
@@ -258,7 +346,7 @@ int main(int argc, char* argv[]){
                         SDL_RenderPresent(g_screen);
                     }
                     num_die ++;
-                    if (num_die <= 3){
+                    if (num_die <= 2){
                         p_player.SetRect(0, 0);
                         p_player.set_comeback_time(60);
                         SDL_Delay(1000);
@@ -266,7 +354,21 @@ int main(int argc, char* argv[]){
                         player_power.Render(g_screen);
                         continue;
                     } else{
-                        if (MessageBoxW(NULL, L"GAME OVER", L"Info", MB_OK | MB_ICONSTOP) == IDOK){
+                        bool play_again = ShowGameOverScreen(g_screen, font_time, mark_value);
+                        if (play_again) {
+                        // Reset game state để chơi lại
+                            time_val = 0; // Reset thời gian
+                            val_time = 300;
+                            mark_value = 0; // Reset điểm số
+                            num_die = 0; // Reset số lần chết
+                            p_player.Reset();
+                            p_player.SetMapXY(0, 0); // Đặt lại vị trí nhân vật
+                            player_power.Init(g_screen); // Reset số mạng
+                            threats_list.clear(); // Xóa danh sách kẻ thù
+                            threats_list = MakeThreatList(); // Tạo lại danh sách kẻ thù
+                            game_started = false; // Reset trạng thái game
+                            continue; // Tiếp tục vòng lặp chính
+                        } else {
                             p_threat->Free();
                             close();
                             SDL_Quit();
@@ -321,10 +423,22 @@ int main(int argc, char* argv[]){
 
         // Show game time
         std::string str_time = "Time: ";
-        Uint32 time_val = SDL_GetTicks() / 1000;
-        Uint32 val_time = 300 - time_val;
         if (val_time <= 0){
-            if (MessageBoxW(NULL, L"GAME OVER", L"Info", MB_OK | MB_ICONSTOP) == IDOK){
+            bool play_again = ShowGameOverScreen(g_screen, font_time, mark_value);
+            if (play_again) {
+            // Reset game state để chơi lại
+                time_val = 0; // Reset thời gian
+                val_time = 300;
+                mark_value = 0; // Reset điểm số
+                num_die = 0; // Reset số lần chết
+                p_player.Reset();
+                p_player.SetMapXY(0, 0); // Đặt lại vị trí nhân vật
+                player_power.Init(g_screen); // Reset số mạng
+                threats_list.clear(); // Xóa danh sách kẻ thù
+                threats_list = MakeThreatList(); // Tạo lại danh sách kẻ thù
+                game_started = false; // Reset trạng thái game
+                continue; // Tiếp tục vòng lặp chính
+            }else {
                 is_quit = true;
                 break;
             }
@@ -338,7 +452,7 @@ int main(int argc, char* argv[]){
         }
 
         std::string val_str_mark = std::to_string(mark_value);
-        std::string strMark("Mark: ");
+        std::string strMark("Score: ");
         strMark += val_str_mark;
 
         mark_game.SetText(strMark);

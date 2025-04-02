@@ -21,6 +21,7 @@ MainObject::MainObject(){
     come_back_time_ = 0;
     money_count = 0;
     current_bullet_type_ = BulletObject::SPHERE_BULLET;
+    max_bullet_type_ = BulletObject::SPHERE_BULLET;
 }
 
 MainObject::~MainObject(){
@@ -92,6 +93,29 @@ void MainObject::set_clip(){   //tach frame
     }
 }
 
+void MainObject::Reset(){
+    frame_ = 0;
+    x_pos_ = 0;
+    y_pos_ = 0;
+    x_val_ = 0;
+    y_val_ = 0;
+    width_frame_ = 0;
+    height_frame_ = 0;
+    status_ = WALK_NONE;
+    input_type_.left_ = 0;
+    input_type_.right_ = 0;
+    input_type_.jump_ = 0;
+    input_type_.down_ = 0;
+    input_type_.up_ = 0;
+    on_ground_ = false;
+    map_x_ = 0;
+    map_y_ = 0;
+    come_back_time_ = 0;
+    money_count = 0;
+    current_bullet_type_ = BulletObject::SPHERE_BULLET;
+    max_bullet_type_ = BulletObject::SPHERE_BULLET;
+}
+
 void MainObject::Show(SDL_Renderer* des){
     UpdateImagePlayer(des);
 
@@ -139,7 +163,7 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
         case SDLK_t:
             {
                 current_bullet_type_ ++;
-                if (current_bullet_type_ > BulletObject::LASER_BULLET){
+                if (current_bullet_type_ > max_bullet_type_){
                     current_bullet_type_ = BulletObject::SPHERE_BULLET;
                 }
             }
@@ -398,6 +422,12 @@ void MainObject::UpdateImagePlayer(SDL_Renderer* des){
 
 void MainObject::IncreaseMoney(){
     money_count ++;
+    if (money_count % 3 == 0){
+        max_bullet_type_ ++;
+        if (max_bullet_type_ > BulletObject::GREEN_BULLET){
+            max_bullet_type_ = BulletObject::GREEN_BULLET;
+        }
+    }
 }
 
 void MainObject::RemoveBullet(const int& index){
