@@ -242,8 +242,7 @@ void ThreatsObject::InitThreats(){
 
 void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen){
     if (p_bullet != NULL){
-
-        p_bullet->set_bullet_type(BulletObject::SPHERE_BULLET);
+        p_bullet->set_bullet_type(BulletObject::THREAT_BULLET);
         bool ret = p_bullet->LoadBullet(screen);
         if (ret){
             p_bullet->set_is_move(false);
@@ -299,4 +298,3 @@ SDL_Rect ThreatsObject::GetRectFrame(){
     rect.h = height_frame_;
     return rect;
 }
-
