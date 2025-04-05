@@ -206,6 +206,7 @@ int main(int argc, char* argv[]){
 
     Timer fps_timer;
     bool game_started = false;
+    Uint32 start_time = SDL_GetTicks();
 
     if (InitData() == false){
         return -1;
@@ -295,8 +296,8 @@ int main(int argc, char* argv[]){
         player_power.Show(g_screen);
         player_money.Show(g_screen);
 
-        Uint32 time_val = SDL_GetTicks() / 1000;
-        Uint32 val_time = 300 - time_val;
+        Uint32 elapsed_time = (SDL_GetTicks() - start_time) / 1000; // Thời gian đã trôi qua (giây)
+        Uint32 val_time = 300 - elapsed_time;
 
 
         for (int i = 0; i < threats_list.size(); i++){
@@ -357,8 +358,7 @@ int main(int argc, char* argv[]){
                         bool play_again = ShowGameOverScreen(g_screen, font_time, mark_value);
                         if (play_again) {
                         // Reset game state để chơi lại
-                            time_val = 0; // Reset thời gian
-                            val_time = 300;
+                            start_time = SDL_GetTicks(); // Reset thời gian bắt đầu
                             mark_value = 0; // Reset điểm số
                             num_die = 0; // Reset số lần chết
                             p_player.Reset();
@@ -421,14 +421,12 @@ int main(int argc, char* argv[]){
             }
         }
 
-        // Show game time
         std::string str_time = "Time: ";
-        if (val_time <= 0){
+        if (val_time <= 0) {
             bool play_again = ShowGameOverScreen(g_screen, font_time, mark_value);
             if (play_again) {
-            // Reset game state để chơi lại
-                time_val = 0; // Reset thời gian
-                val_time = 300;
+                // Reset game state để chơi lại
+                start_time = SDL_GetTicks(); // Reset thời gian bắt đầu
                 mark_value = 0; // Reset điểm số
                 num_die = 0; // Reset số lần chết
                 p_player.Reset();
@@ -438,7 +436,7 @@ int main(int argc, char* argv[]){
                 threats_list = MakeThreatList(); // Tạo lại danh sách kẻ thù
                 game_started = false; // Reset trạng thái game
                 continue; // Tiếp tục vòng lặp chính
-            }else {
+            } else {
                 is_quit = true;
                 break;
             }

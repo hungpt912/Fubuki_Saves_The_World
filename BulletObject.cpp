@@ -21,7 +21,8 @@ bool BulletObject::LoadBullet(SDL_Renderer* des){
         ret = LoadImg("img/bullet_red.png", des);
     } else if (bullet_type_ == GREEN_BULLET){
         ret = LoadImg("img/bullet_green.png", des);
-    } else if (bullet_type_ == THREAT_BULLET){
+    }
+     else if (bullet_type_ == THREAT_BULLET){
         ret = LoadImg("img/bullet_threat.png", des);
     }
     return ret;

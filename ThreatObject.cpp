@@ -78,9 +78,9 @@ void ThreatsObject::set_clips(){
 }
 
 void ThreatsObject::Show(SDL_Renderer* des){
-    if (come_back_time_ == 0){
-        rect_.x = x_pos_ - map_x_;
+    rect_.x = x_pos_ - map_x_;
         rect_.y = y_pos_ - map_y_;
+    if (come_back_time_ == 0){
         frame_++;
         if (frame_ >= 8){
             frame_ = 0;
@@ -256,6 +256,14 @@ void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen){
 }
 
 void ThreatsObject::MakeBullet(SDL_Renderer* screen, const int& x_limit, const int& y_limit){
+    if (type_move_ != STATIC_THREAT){
+        return;
+    }
+
+    if (bullet_list_.empty()) {
+        BulletObject* p_bullet = new BulletObject();
+        InitBullet(p_bullet, screen);
+    }
 
     for (int i = 0; i < bullet_list_.size(); i++){
         BulletObject* p_bullet = bullet_list_.at(i);

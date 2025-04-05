@@ -168,7 +168,7 @@ void MainObject::HandleInputAction(SDL_Event events, SDL_Renderer* screen){
                 }
             }
             break;
-        case SDLK_w:
+        case SDLK_SPACE:
             input_type_.jump_ = 1;
             break;
         default:
