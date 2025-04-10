@@ -44,6 +44,12 @@ public:
     }
     void HandleBullet(SDL_Renderer* des);
     void RemoveBullet(const int& index);
+    void ResetFall(){
+        is_fall_ = false;
+    }
+    bool checkFall() const{
+        return is_fall_;
+    }
     void IncreaseMoney();
     int get_frame_width() const{
         return width_frame_;
@@ -75,6 +81,7 @@ private:
     int frame_;
     int status_;
     bool on_ground_;
+    bool is_fall_;
 
     int map_x_;
     int map_y_;

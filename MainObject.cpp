@@ -16,6 +16,7 @@ MainObject::MainObject(){
     input_type_.down_ = 0;
     input_type_.up_ = 0;
     on_ground_ = false;
+    is_fall_ = false;
     map_x_ = 0;
     map_y_ = 0;
     come_back_time_ = 0;
@@ -401,6 +402,7 @@ void MainObject::CheckToMap(Map &data){  //dung tren map
     }
 
     if (y_pos_ > data.max_y_){
+        is_fall_ = true;
         come_back_time_ = 60;
     }
 }

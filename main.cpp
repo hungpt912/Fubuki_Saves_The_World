@@ -333,7 +333,7 @@ int main(int argc, char* argv[]){
                     continue;
                 }
 
-                if (bCol1 || bCol2){
+                if (bCol1 || bCol2 || p_player.checkFall()){
 
                     int width_exp_frame = exp_main.get_frame_width();
                     int height_exp_frame = exp_main.get_frame_height();
@@ -347,6 +347,7 @@ int main(int argc, char* argv[]){
                         SDL_RenderPresent(g_screen);
                     }
                     num_die ++;
+                    p_player.ResetFall();
                     if (num_die <= 2){
                         p_player.SetRect(0, 0);
                         p_player.set_comeback_time(60);
